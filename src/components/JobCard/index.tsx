@@ -1,17 +1,12 @@
+import { Jobs } from "@prisma/client";
 import { Button } from "../ui/button";
 import { Card } from "../ui/card";
 import { Typography } from "../ui/typography";
 
-type JobList = {
-  id: number;
-  name: string;
-  description: string;
-  jobImageURL?: string;
-  price: number;
-};
+
 
 type JobCardProps = {
-  service: JobList;
+  service: Jobs;
 };
 
 export function JobCard({ service }: JobCardProps) {
