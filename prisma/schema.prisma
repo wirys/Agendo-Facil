@@ -1,0 +1,66 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Tenant {
+  id               Int               @id @default(autoincrement())
+  slug             String            @unique
+  name             String?
+  documentNumber   BigInt?
+  address          String?
+  latitude         BigInt?
+  longitude        BigInt?
+  tenantIdentify   String            @unique @default(uuid()) // Plataform TenantID 
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @default(now()) @updatedAt
+  tenantExpedients TenantExpedient[]
+  categories       Categories[]
+  jobs             Jobs[]
+}
+
+model TenantExpedient {
+  id               Int      @id @default(autoincrement())
+  weekDayName      String
+  initialServiceAt Decimal  @default(0.00)
+  finalServiceAt   Decimal  @default(0.00)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @default(now()) @updatedAt
+  Tenant           Tenant?  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenantId         Int?
+}
+
+model Categories {
+  id        Int      @id @default(autoincrement())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+  Tenant    Tenant?  @relation(fields: [tenantId], references: [tenantIdentify], onDelete: Cascade)
+  tenantId  String
+  jobs      Jobs[]
+}
+
+model Jobs {
+  id           Int         @id @default(autoincrement())
+  name         String
+  description  String
+  duration     BigInt
+  price        Decimal
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @default(now()) @updatedAt
+  jobImageURL  String?     @default("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQbjpidNNgEsw5FilrgRG31qHay4kKeS_EnyQ&s")
+  Tenant       Tenant?     @relation(fields: [tenantId], references: [tenantIdentify], onDelete: Cascade)
+  tenantId     String
+  Categories   Categories? @relation(fields: [categoriesId], references: [id])
+  categoriesId Int?
+}
