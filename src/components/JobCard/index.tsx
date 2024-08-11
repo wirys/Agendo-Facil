@@ -6,15 +6,15 @@ import { Typography } from "../ui/typography";
 
 
 type JobCardProps = {
-  service: Jobs;
+  job: Jobs;
 };
 
-export function JobCard({ service }: JobCardProps) {
+export function JobCard({ job }: JobCardProps) {
   return (
-    <Card className="flex p-4 items-center gap-4" key={service.id}>
+    <Card className="flex p-4 items-center gap-4" key={job.id}>
       <div className="w-1/4">
         <img
-          src={service.jobImageURL || ""}
+          src={job?.jobImageURL || ""}
           alt="Serviço"
           width={80}
           height={80}
@@ -23,13 +23,13 @@ export function JobCard({ service }: JobCardProps) {
       </div>
       <div className="w-2/4 gap-2">
         <Typography variant="h1" className="text-sm">
-          {service.name}
+          {job.name}
         </Typography>
         <Typography variant="caption" className="text-slate-500">
-          {service.description}
+          {job.description}
         </Typography>
         <Typography variant="body2" className="text-purple-600 mt-2 font-bold">
-          R$ {service.price.toFixed(2)}
+          R$ {job.price.toString()}
         </Typography>
       </div>
       <div className="w-1/4">
