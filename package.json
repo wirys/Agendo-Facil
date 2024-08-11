@@ -1,5 +1,5 @@
 {
-  "name": "agenda",
+  "name": "agendo-facil",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@hookform/resolvers": "^3.9.0",
     "@next/font": "^14.2.5",
     "@prisma/client": "^5.16.1",
     "@radix-ui/react-accordion": "^1.2.0",
@@ -27,6 +28,8 @@
     "react": "^18",
     "react-day-picker": "^8.10.1",
     "react-dom": "^18",
+    "react-hook-form": "^7.52.2",
+    "react-query": "^3.39.3",
     "tailwind-merge": "^2.3.0",
     "tailwindcss-animate": "^1.0.7",
     "zod": "^3.23.8"
