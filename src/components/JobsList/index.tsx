@@ -1,3 +1,4 @@
+// components/JobList.tsx
 import { useEffect, useState } from "react";
 import { JobCard } from "../JobCard";
 import { JobCardSkeleton } from "../JobCardSkeleton";
@@ -5,7 +6,14 @@ import { Typography } from "../ui/typography";
 import { getJobsService } from "@/app/services/jobs/getJobsService";
 import { Jobs } from "@prisma/client";
 
-export function JobList({ searchParams }: any) {
+type JobListProps = {
+  searchParams: {
+    query: string;
+    categoryIds: number[];
+  };
+};
+
+export function JobList({ searchParams }: JobListProps) {
   const [jobs, setJobs] = useState<Jobs[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -14,10 +22,10 @@ export function JobList({ searchParams }: any) {
       let listJobs: Jobs[] = [];
       setIsLoading(true);
       try {
-        if (searchParams === "" || searchParams === null || searchParams === undefined) {
+        if (!searchParams.query && searchParams.categoryIds.length === 0) {
           listJobs = await getJobsService();
         } else {
-          listJobs = await getJobsService(searchParams);
+          listJobs = await getJobsService(searchParams.query, searchParams.categoryIds);
         }
         setJobs(listJobs);
       } catch (error) {

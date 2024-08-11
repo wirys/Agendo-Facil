@@ -1,19 +1,22 @@
 "use server";
 
 import { db } from "@/lib/prisma";
+import { Jobs } from "@prisma/client";
 
-interface ListJobsParams {
-    limit?: number;
-    name?: string
 
-}
 
-export const getJobsService = async (query?: string) => {
-    return await db.jobs.findMany({
-      where: {
-        name: {
-          contains: query,
-        },
+
+export async function getJobsService(query: string = "", categoryIds: number[] = []): Promise<Jobs[]> {
+  return await db.jobs.findMany({
+    where: {
+      name: {
+        contains: query,
       },
-    });
-  };
+      ...(categoryIds.length > 0 ? {
+        categoriesId: {
+          in: categoryIds,
+        },
+      } : {}),
+    },
+  });
+}

@@ -5,9 +5,13 @@ import { Categories } from "@prisma/client";
 import { getCategoriesService } from "@/app/services/categories/getCategoriesService";
 import { CategorySkeleton } from "@/components/CategorySkeleton";
 
-export function SearchCategories() {
+type SearchCategoriesProps = {
+  onSelectCategories: (selectedIds: Set<number>) => void;
+};
+
+export function SearchCategories({ onSelectCategories }: SearchCategoriesProps) {
   const [categories, setCategories] = useState<Categories[]>([]);
-  const [isLoading, setIsLoading] = useState(true); // Inicializa como true para mostrar o esqueleto inicialmente
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetch = async () => {
@@ -24,19 +28,21 @@ export function SearchCategories() {
     fetch();
   }, []);
 
-  // Estado para gerenciar os filtros selecionados
-  const [selectedCategories, setSelectedCategories] = useState<Set<string>>(
+  const [selectedCategories, setSelectedCategories] = useState<Set<number>>(
     new Set()
   );
 
-  // Função para alternar o estado de seleção
-  const handleToggleCategory = (category: string) => {
+  useEffect(() => {
+    onSelectCategories(selectedCategories);
+  }, [selectedCategories, onSelectCategories]);
+
+  const handleToggleCategory = (categoryId: number) => {
     setSelectedCategories((prevState) => {
       const updatedState = new Set(prevState);
-      if (updatedState.has(category)) {
-        updatedState.delete(category);
+      if (updatedState.has(categoryId)) {
+        updatedState.delete(categoryId);
       } else {
-        updatedState.add(category);
+        updatedState.add(categoryId);
       }
       return updatedState;
     });
@@ -55,12 +61,12 @@ export function SearchCategories() {
           <Badge
             key={category.id}
             variant={
-              selectedCategories.has(category.name) ? "default" : "outline"
+              selectedCategories.has(category.id) ? "default" : "outline"
             }
-            onClick={() => handleToggleCategory(category.name)}
+            onClick={() => handleToggleCategory(category.id)}
             className="cursor-pointer gap-1"
           >
-            {selectedCategories.has(category.name) ? (
+            {selectedCategories.has(category.id) ? (
               <CheckIcon size={12} />
             ) : null}
             {category.name}
