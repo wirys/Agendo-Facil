@@ -1,36 +1,21 @@
-import { JobCard } from "@/components/JobCard";
-import { JobCardSkeleton } from "@/components/JobCardSkeleton";
+"use client";
+import { useState } from "react";
+import { JobList } from "@/components/JobsList";
 import { ScheduleMainHeader } from "@/components/ScheduleMainHeader";
 import { SearchCategories } from "@/components/SearchCategories";
 import { SearchInput } from "@/components/SearchInput";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback} from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Typography } from "@/components/ui/typography";
-import { db } from "@/lib/prisma";
-import axios from "axios";
-import Image from "next/image";
 
-export default async function RenderTenantPage({ params }: any) {
 
-  let services = [];
-  let categories = [];
-  let isLoading = true;
 
-  // Make the API call using axios
-  try {
-    const response = await axios.get(
-      `http://localhost:3000/api/tenant/${params.slug}`
-    );
-
-    if (response.status === 200) {
-      const tenantData = response.data;
-
-      services = await db.jobs.findMany({});
-      categories = await db.categories.findMany({});
-      isLoading = false;
-
+export default function RenderTenantPage({ params }: any) {
+const [query, setQuery] = useState(""); 
+const handleSearch = (searchQuery: string) => {
+    setQuery(searchQuery);
+  };
       return (
         <>
           <ScheduleMainHeader />
@@ -40,10 +25,10 @@ export default async function RenderTenantPage({ params }: any) {
               <Typography variant="body1">Sexta-feira, 08 de agosto</Typography>
             </div>
             <div className="md:text-right">
-              <SearchInput />
+              <SearchInput onSearch={handleSearch}/>
             </div>
             <div className="flex flex-col gap-4">
-              <SearchCategories categories={categories} />
+              <SearchCategories />
               <div className="flex flex-col gap-4 ">
                 <Typography variant="h4" className="text-slate-500">
                   Agendamentos:
@@ -84,34 +69,8 @@ export default async function RenderTenantPage({ params }: any) {
               </div>
             </div>
           </div>
-          <div className="flex flex-col gap-4 p-4">
-          <Typography variant="h4" className="text-slate-500">
-                  Serviços:
-          </Typography>
-          <div className="grid md:grid-cols-4 sm:grid-cols-3 gap-4 ">
-         
-            {isLoading ? (
-              <>
-                <JobCardSkeleton />
-                <JobCardSkeleton />
-                <JobCardSkeleton />
-                <JobCardSkeleton />
-              </>
-            ) : (
-              services.map((service) => (
-                <JobCard key={service.id} service={service} />
-              ))
-            )}
-            </div>
-            </div>
+          <JobList searchParams={query} />
         </>
       );
-    } else {
-      console.error("API request failed:", response);
-      return <div>Error fetching tenant data!</div>;
-    }
-  } catch (error) {
-    console.error("API request error:", error);
-    return <div>Error fetching tenant data!</div>;
-  }
+  
 }
