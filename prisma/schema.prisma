@@ -27,6 +27,8 @@ model Tenant {
   tenantExpedients TenantExpedient[]
   categories       Categories[]
   jobs             Jobs[]
+  workSchedules    WorkSchedule[]
+  Booking          Booking[]
 }
 
 model TenantExpedient {
@@ -51,16 +53,118 @@ model Categories {
 }
 
 model Jobs {
-  id           Int         @id @default(autoincrement())
-  name         String
-  description  String
-  duration     BigInt
-  price        Decimal
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @default(now()) @updatedAt
-  jobImageURL  String?     @default("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQbjpidNNgEsw5FilrgRG31qHay4kKeS_EnyQ&s")
-  Tenant       Tenant?     @relation(fields: [tenantId], references: [tenantIdentify], onDelete: Cascade)
-  tenantId     String
-  Categories   Categories? @relation(fields: [categoriesId], references: [id])
-  categoriesId Int?
+  id               Int                @id @default(autoincrement())
+  name             String
+  description      String
+  duration         BigInt
+  price            Decimal
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @default(now()) @updatedAt
+  jobImageURL      String?            @default("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQbjpidNNgEsw5FilrgRG31qHay4kKeS_EnyQ&s")
+  tenantId         String
+  Tenant           Tenant?            @relation(fields: [tenantId], references: [tenantIdentify], onDelete: Cascade)
+  categoriesId     Int?
+  Categories       Categories?        @relation(fields: [categoriesId], references: [id])
+  ProfessionalJobs ProfessionalJobs[] // Relacionamento com a tabela de associação
+  Booking          Booking[]
+}
+
+model Professionals {
+  id               Int                @id @default(autoincrement())
+  name             String
+  profilePicURL    String?            @default("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQbjpidNNgEsw5FilrgRG31qHay4kKeS_EnyQ&s")
+  workSchedules    WorkSchedule[]
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @default(now()) @updatedAt
+  ProfessionalJobs ProfessionalJobs[] // Relacionamento com a tabela de associação
+  Booking          Booking[]
+}
+
+model ProfessionalJobs {
+  id             Int           @id @default(autoincrement())
+  price          Decimal
+  duration       BigInt
+  jobId          Int
+  professionalId Int
+  Job            Jobs          @relation(fields: [jobId], references: [id])
+  Professional   Professionals @relation(fields: [professionalId], references: [id])
+
+  @@unique([jobId, professionalId]) // Garante que não haja duplicatas para a mesma combinação de job e professional
+}
+
+model WorkSchedule {
+  id               Int                @id @default(autoincrement())
+  dayOfWeek        Int // 0 = Sunday, 1 = Monday, etc.
+  startTime        String // Ex: "09:00"
+  endTime          String // Ex: "17:00"
+  professional     Professionals?     @relation(fields: [professionalId], references: [id])
+  professionalId   Int
+  HolidayException HolidayException[]
+  Tenant           Tenant             @relation(fields: [tenantId], references: [tenantIdentify], onDelete: Cascade)
+  tenantId         String
+
+  @@unique([professionalId, dayOfWeek]) // Unique constraint to avoid duplicate day entries for the same professional
+  @@index([professionalId])
+  @@index([tenantId])
+}
+
+model Holiday {
+  id               Int                @id @default(autoincrement())
+  name             String // Nome do feriado, ex: "Natal"
+  date             DateTime // Data do feriado
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @default(now()) @updatedAt
+  HolidayException HolidayException[]
+}
+
+model HolidayException {
+  id             Int          @id @default(autoincrement())
+  holidayId      Int
+  workScheduleId Int
+  isWorking      Boolean // True se o profissional ou tenant trabalhará neste feriado
+  startTime      String? // Horário especial de início (opcional)
+  endTime        String? // Horário especial de término (opcional)
+  holiday        Holiday      @relation(fields: [holidayId], references: [id])
+  workSchedule   WorkSchedule @relation(fields: [workScheduleId], references: [id])
+
+  @@unique([holidayId, workScheduleId])
+}
+
+model Booking {
+  id             Int           @id @default(autoincrement())
+  date           DateTime
+  startTime      DateTime
+  endTime        DateTime
+  status         BookingStatus @default(PENDING)
+  jobId          Int
+  professionalId Int
+  clientId       Int
+  tenantId       String
+
+  // Relacionamentos
+  Job          Jobs          @relation(fields: [jobId], references: [id])
+  Professional Professionals @relation(fields: [professionalId], references: [id])
+  Client       Client        @relation(fields: [clientId], references: [id])
+  Tenant       Tenant        @relation(fields: [tenantId], references: [tenantIdentify])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+model Client {
+  id       Int       @id @default(autoincrement())
+  name     String
+  email    String    @unique
+  phone    String
+  bookings Booking[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+// Enum para representar o status da reserva
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
 }
