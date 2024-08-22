@@ -1,7 +1,3 @@
-Aqui está um exemplo de README para o aplicativo Agendo-facil:
-
----
-
 # Agendo-facil
 
 **Agendo-facil** é um aplicativo desenvolvido em **Next.js** para agendamento de serviços com profissionais. Ele permite que os usuários encontrem profissionais, agendem serviços e gerenciem seus compromissos de forma fácil e eficiente.
